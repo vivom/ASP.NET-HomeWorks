@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.Administration;
@@ -76,9 +77,14 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("{id:guid}")]
-        public async Task DeleteEmployeeByIdAsync(Guid id)
+        public async Task<ActionResult> DeleteEmployeeByIdAsync(Guid id)
         {
+            var checkEmployee = await _employeeRepository.GetByIdAsync(id);
+            if (checkEmployee == null)
+                return NotFound();
+
             await _employeeRepository.DeleteByIdAsync(id);
+            return Ok();
         }
 
         /// <summary>
@@ -88,6 +94,14 @@ namespace PromoCodeFactory.WebHost.Controllers
         [HttpPost()]
         public async Task<ActionResult<EmployeeResponse>> CreateNewEmployeeAsync(EmployeeRequest newEmployee)
         {
+            if (newEmployee == null 
+                || newEmployee.Email == string.Empty
+                || newEmployee.LastName == string.Empty
+                || newEmployee.FirstName == string.Empty)
+            {
+                return BadRequest();
+            }
+
             var employee = new Employee()
             {
                 Id = Guid.NewGuid(),
@@ -122,6 +136,15 @@ namespace PromoCodeFactory.WebHost.Controllers
         [HttpPost("{id:guid}")]
         public async Task<ActionResult<EmployeeResponse>> UpdateEmployeeAsync(Guid id, EmployeeRequest updateEmployee)
         {
+            if(updateEmployee == null)
+            {
+                return BadRequest();
+            }
+
+            var checkEmployee = await _employeeRepository.GetByIdAsync(id);
+            if (checkEmployee == null)
+                return NotFound();
+
             var employee = new Employee()
             {
                 FirstName = updateEmployee.FirstName,

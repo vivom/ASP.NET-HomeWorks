@@ -9,14 +9,14 @@ namespace PromoCodeFactory.DataAccess.Repositories
 {
     public class InMemoryRepository<T> : IRepository<T> where T : BaseEntity
     {
-        protected IEnumerable<T> Data { get; set; }
+        protected List<T> Data { get; set; }
 
-        public InMemoryRepository(IEnumerable<T> data)
+        public InMemoryRepository(List<T> data)
         {
             Data = data;
         }
 
-        public Task<IEnumerable<T>> GetAllAsync()
+        public Task<List<T>> GetAllAsync()
         {
             return Task.FromResult(Data);
         }
@@ -28,38 +28,30 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public Task DeleteByIdAsync(Guid id)
         {
-            var employeeList = Data as List<Employee>;
-            var finderEmployee = employeeList.FirstOrDefault(x => x.Id == id);
+            var finderEmployee = Data.FirstOrDefault(x => x.Id == id);
 
             if (finderEmployee is not null)
             {
-                employeeList.Remove(finderEmployee);
-                Data = employeeList as IEnumerable<T>;
+                Data.Remove(finderEmployee);
             }
 
             return Task.CompletedTask;
         }
 
-        public Task<T> UpdateAsync(Guid id, Employee employee)
+        public Task<T> UpdateAsync(Guid id, T updateElement)
         {
-            employee.Id = id;
-            var employeeList = Data as List<Employee>;
-            var finderEmployee = employeeList.FindIndex(x => x.Id == id);
+            updateElement.Id = id;
+            var finderEmployee = Data.FindIndex(x => x.Id == id);
 
-            employeeList[finderEmployee] = employee;
-            Data = employeeList as IEnumerable<T>;
+            Data[finderEmployee] = updateElement;
 
             return Task.FromResult(Data.FirstOrDefault(x => x.Id == id));
         }
 
-        public Task<T> CreateAsync(Employee employee)
+        public Task<T> CreateAsync(T newElement)
         {
-            var employeeList = Data as List<Employee>;
-            employeeList.Add(employee);
-
-
-            Data = employeeList as IEnumerable<T>;
-            return GetByIdAsync(Data.Where(i => i.Id == employee.Id).FirstOrDefault().Id);
+            Data.Add(newElement);
+            return GetByIdAsync(Data.Where(i => i.Id == newElement.Id).FirstOrDefault().Id);
         }
     }
 }
