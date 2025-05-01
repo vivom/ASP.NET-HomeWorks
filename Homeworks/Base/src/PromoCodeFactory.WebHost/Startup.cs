@@ -6,6 +6,8 @@ using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.Administration;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PromoCodeFactory.WebHost
 {
@@ -15,9 +17,9 @@ namespace PromoCodeFactory.WebHost
         {
             services.AddControllers();
             services.AddSingleton(typeof(IRepository<Employee>), (x) => 
-                new InMemoryRepository<Employee>(FakeDataFactory.Employees));
+                new InMemoryRepository<Employee>(FakeDataFactory.Employees.ToList()));
             services.AddSingleton(typeof(IRepository<Role>), (x) => 
-                new InMemoryRepository<Role>(FakeDataFactory.Roles));
+                new InMemoryRepository<Role>(FakeDataFactory.Roles.ToList()));
 
             services.AddOpenApiDocument(options =>
             {
